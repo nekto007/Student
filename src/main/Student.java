@@ -3,67 +3,86 @@ package main;
 import java.util.Objects;
 
 public class Student extends Person {
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Student)) return false;
-        Student student = (Student) o;
-        return group == student.group &&
-                solvedTasks == student.solvedTasks &&
-                modulesPassed == student.modulesPassed &&
-                Objects.equals(experience, student.experience) &&
-                Objects.equals(goal, student.goal);
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(group, solvedTasks, modulesPassed, experience, goal);
-    }
 
-    public static final int MAX_MODULE = 10;
-    private int group;
-    private int solvedTasks;
-    private int modulesPassed;
-    private String experience;
-    private String goal;
-    static int overallTasksSolved;
-    static int maxModulePassed;
+    private int countSolvedTasks;
+    private static int countSolvedTasksForAllStudents;
+    private Mentor mentor;
+    private boolean passedAllTask;
 
-    public void modulePassed() {
-        System.out.println("Module passed");
-        modulesPassed += 1;
-        if (maxModulePassed < modulesPassed) {
-            maxModulePassed = modulesPassed;
-        }
-        if (modulesPassed == MAX_MODULE) {
-            System.out.println("Congrats with completing the course");
-        }
-    }
-
-    public void taskSolved() {
-        System.out.println("Task solved");
-        solvedTasks += 1;
-        overallTasksSolved += 1;
-    }
-
-    public Student(String firstName, String lastName, int age, int group, int solvedTasks, int modulesPassed,
-                   String experience, String goal) {
+    public Student(String firstName, String lastName, int age, Mentor mentor) {
         super(firstName, lastName, age);
-        this.group = group;
-        this.solvedTasks = solvedTasks;
-        this.modulesPassed = modulesPassed;
-        this.experience = experience;
-        this.goal = goal;
+        this.countSolvedTasks = 0;
+        this.mentor = mentor;
+    }
+
+    public int getCountSolvedTasks() {
+        return countSolvedTasks;
+    }
+
+    public void setCountSolvedTasks(int countSolvedTasks) {
+        this.countSolvedTasks = countSolvedTasks;
+    }
+
+    public static int getCountSolvedTasksForAllStudents() {
+        return countSolvedTasksForAllStudents;
+    }
+
+    public static void setCountSolvedTasksForAllStudents(int countSolvedTasksForAllStudents) {
+        Student.countSolvedTasksForAllStudents = countSolvedTasksForAllStudents;
+    }
+
+    public Mentor getMentor() {
+        return mentor;
+    }
+
+    public void setMentor(Mentor mentor) {
+        this.mentor = mentor;
+    }
+
+    public boolean isPassedAllTask() {
+        return passedAllTask;
+    }
+
+    public void setPassedAllTask(boolean passedAllTask) {
+        this.passedAllTask = passedAllTask;
+    }
+
+    public void passedTask(int numberOfTasksToComplete, Task[] tasks) {
+        System.out.println("Надо решить: " + numberOfTasksToComplete + " задач из: " + tasks.length);
+        if (numberOfTasksToComplete > tasks.length) {
+            System.out.println("Задач должно быть меньше чем " + tasks.length);
+        } else {
+            for (int i = 0; i < numberOfTasksToComplete; i++) {
+                solveTask(tasks[i]);
+            }
+            passedAllTask = (countSolvedTasks == tasks.length);
+        }
     }
 
     @Override
     public String toString() {
         return "Student{" +
-                "group=" + group +
-                ", solvedTasks=" + solvedTasks +
-                ", modulesPassed=" + modulesPassed +
-                ", experience='" + experience + '\'' +
-                ", goal='" + goal + '\'' +
+                "countSolvedTasks=" + countSolvedTasks +
+                ", mentor=" + mentor +
+                ", passedAllTask=" + passedAllTask +
                 '}';
     }
+
+    private void solveTask(Task task) {
+        if ((task instanceof Test) || (task instanceof DragAndDrop)) {
+            System.out.println("Задание " + task.getNumber() + " выполнено!");
+            countSolvedTasks++;
+            countSolvedTasksForAllStudents++;
+        } else if (task instanceof WriteCode) {
+            while (true) {
+                if (mentor.checkCode(task)) {
+                    countSolvedTasks++;
+                    countSolvedTasksForAllStudents++;
+                    break;
+                }
+            }
+        }
+    }
+
 }
